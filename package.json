@@ -7,10 +7,14 @@
     {
       "name": "Stephen Wan",
       "email": "stephen@stephenwan.net"
+    },
+    {
+      "name": "James Booth",
+      "email": "jabooth@gmail.com"
     }
   ],
   "engines": {
-    "node": "0.12.x"
+    "node": ">=6"
   },
   "scripts": {
     "start": "node ./examples/server.js",
@@ -22,18 +26,18 @@
   },
   "dependencies": {
     "alac2pcm": "^1.1.0",
-    "debug": "^2.1.0",
-    "forge": "^2.2.0",
+    "debug": "^2.3.3",
+    "forge": "^2.3.0",
     "httplike": "^1.0.2",
-    "ipaddr.js": "^1.0.1",
-    "mdns": "^2.2.10",
-    "metricstream": "0.0.0",
-    "node-forge": "^0.6.16",
-    "portastic": "0.0.1",
-    "priorityqueuejs": "0.2.0",
+    "ipaddr.js": "^1.2.0",
+    "mdns": "^2.3.3",
+    "metricstream": "0.0.1",
+    "node-forge": "^0.6.46",
+    "portastic": "1.0.1",
+    "priorityqueuejs": "1.0.0",
     "random-mac": "0.0.4",
-    "randomstring": "1.0.3",
-    "readable-stream": "^2.0.2"
+    "randomstring": "1.1.5",
+    "readable-stream": "^2.2.2"
   },
   "devDependencies": {
     "gulp": "~3.6.2",
