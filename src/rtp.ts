@@ -1,8 +1,7 @@
 import * as crypto from 'crypto'
 import { createSocket, Socket } from 'dgram'
 
-
-const tools = require('./helper')
+import * as tools from './helper'
 let debug = require('debug')('nodetunes:rtp')
 import { RtspServer } from './rtsp'
 
@@ -37,11 +36,13 @@ export class RtpServer {
         this.timeoutCounter = -1
         this.timeoutChecker = null
 
-        this.baseServer.on('message', msg => {
+        this.baseServer.on('message', (msg: Buffer) => {
             const seq = msg.readUInt16BE(2)
             const audio = tools.decryptAudioData(msg, this.rtspServer.audioAesKey,
                                                  this.rtspServer.audioAesIv)
-            this.rtspServer.outputStream.add(audio, seq)
+            if (this.rtspServer.outputStream) {
+                this.rtspServer.outputStream.add(audio, seq)
+            }
 
         })
 

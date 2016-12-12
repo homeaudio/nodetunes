@@ -74,7 +74,7 @@ export class NodeTunes extends EventEmitter {
         this.rtspServer = new RtspServer(this.options, this)
     }
 
-    start(callback) {
+    start(callback: Function) {
 
         console.log('starting nodetunes server (%s)', this.options.serverName)
 
@@ -82,7 +82,7 @@ export class NodeTunes extends EventEmitter {
             min: 5000,
             max: 5050,
             retrieve: 1,
-        }).then(ports => {
+        }).then((ports: number[]) => {
             const port = ports[0]
             this.netServer = net.createServer(this.rtspServer.connectHandler.bind(this.rtspServer))
 
@@ -116,7 +116,7 @@ export class NodeTunes extends EventEmitter {
 
             })
 
-        }).catch(err => {
+        }).catch((err: Error) => {
             if (callback) {
                 callback(err)
             } else {
@@ -128,7 +128,9 @@ export class NodeTunes extends EventEmitter {
 
     stop() {
         debug('stopping nodetunes server')
-        this.netServer.close()
+        if (this.netServer) {
+            this.netServer.close()
+        }
         this.rtspServer.stop()
         this.advertisement.stop()
     }

@@ -3,12 +3,19 @@ import { inspect } from 'util'
 import { Socket } from 'net'
 import { RtpServer } from './rtp'
 import { mapRtspMethods, RtspMethods } from './rtspmethods'
-import { NodeTunes, NodeTunesOptions } from './server'
+import { NodeTunes, NodeTunesOptions } from '.'
 import { OutputStream } from './streams/output'
 
 let debug = require('debug')('nodetunes:rtsp')
 const error = require('debug')('nodetunes:error')
 
+
+export interface RtspMetadata {
+    artwork?: Buffer
+    volume?: number
+    progress?: string
+    clientName?: string
+}
 
 export class RtspServer {
 
@@ -17,30 +24,27 @@ export class RtspServer {
     rtp: RtpServer
     macAddress: string
     socket: Socket
-    handling: Socket | null
+    handling: Socket | null = null
     ports: number[] = []
-    outputStream: OutputStream | null
+    outputStream: OutputStream | null = null
     controlTimeout: number
-    clientConnected: Socket | null
+    clientConnected: Socket | null = null
     ipv6 = false  // true iff ipv6 usage is detected.
     methodMapping: RtspMethods
+    audioAesKey: string
+    audioAesIv: Buffer
+    audioCodec: string
+    audioOptions: string[]
+    metadata: RtspMetadata = {}
 
     constructor(options: NodeTunesOptions, external: NodeTunes) {
         // HACK: need to reload debug here (https://github.com/visionmedia/debug/issues/150)
         debug = require('debug')('nodetunes:rtsp')
-
         this.external = external
         this.options = options
-
         this.rtp = new RtpServer(this)
         this.macAddress = options.macAddress
-        this.metadata = {}
-        this.outputStream = null
-
-        this.handling = null
-        this.clientConnected = null
         this.controlTimeout = options.controlTimeout
-
         this.methodMapping = mapRtspMethods(this)
     }
 

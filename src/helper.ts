@@ -7,7 +7,7 @@ let debug = require('debug')('nodetunes:helper')
 export function parseSdp(msg: string) {
     const multi = ['a', 'p', 'b']
     const lines = msg.split('\r\n')
-    const output = {}
+    const output: { [key: string]: string | string[]} = {}
 
     for (let i = 0; i < lines.length; i++) {
 
@@ -40,7 +40,7 @@ const DMAP_TYPES = {
     astm: 4,
 }
 
-export function parseDmap(buffer) {
+export function parseDmap(buffer: Buffer) {
     const output = {}
 
     for (let i = 8; i < buffer.length;) {
@@ -74,7 +74,7 @@ function getPrivateKey() {
 
 export const PRIVATE_KEY = getPrivateKey()
 
-export function generateAppleResponse(challengeBuf, ipAddr, macAddr) {
+export function generateAppleResponse(challengeBuf: Buffer, ipAddr: Buffer, macAddr: Buffer) {
     // HACK: need to reload debug here (https://github.com/visionmedia/debug/issues/150)
     debug = require('debug')('nodetunes:helper') 
     debug('building challenge for %s (ip: %s, mac: %s)', challengeBuf.toString('base64'), ipAddr.toString('hex'), macAddr.toString('hex'))
@@ -106,7 +106,7 @@ export function generateRfc2617Response(username: string, realm: string, passwor
     return md5(ha1 + ':' + nonce + ':' + ha2)
 }
 
-export function getDecoderOptions(audioOptions: [string]) {
+export function getDecoderOptions(audioOptions: string[]) {
     return !audioOptions ? {} : {
         frameLength: parseInt(audioOptions[1], 10),
         compatibleVersion: parseInt(audioOptions[2], 10),
@@ -122,12 +122,10 @@ export function getDecoderOptions(audioOptions: [string]) {
     }
 }
 
-export function decryptAudioData(data, audioAesKey, audioAesIv, headerSize: number) {
+export function decryptAudioData(data: Buffer, audioAesKey: string, 
+                                 audioAesIv: Buffer, headerSize = 12) {
     const tmp = new Buffer(16)
-    if (!headerSize) {
-        headerSize = 12
-    }
-    const remainder = (data.length - 12) % 16
+    const remainder = (data.length - headerSize) % 16
     const endOfEncodedData = data.length - remainder
 
     const audioAesKeyBuffer = new Buffer(audioAesKey, 'binary')

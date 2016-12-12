@@ -31,7 +31,7 @@ export class BaseDecoderStream extends Readable {
             return result
         } else {
             this.bufferQueue.enq(data)
-            // TODO do we return true or false here?
+            return false
         }
     }
 
