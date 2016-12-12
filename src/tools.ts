@@ -76,7 +76,7 @@ export const PRIVATE_KEY = getPrivateKey()
 
 export function generateAppleResponse(challengeBuf: Buffer, ipAddr: Buffer, macAddr: Buffer) {
     // HACK: need to reload debug here (https://github.com/visionmedia/debug/issues/150)
-    debug = require('debug')('nodetunes:helper') 
+    debug = require('debug')('nodetunes:helper')
     debug('building challenge for %s (ip: %s, mac: %s)', challengeBuf.toString('base64'), ipAddr.toString('hex'), macAddr.toString('hex'))
 
     const fullChallengeUnpadded = Buffer.concat([challengeBuf, ipAddr, macAddr])
@@ -99,11 +99,11 @@ function md5(content: string) {
     return crypto.createHash('md5').update(content).digest().toString('hex')
 }
 
-export function generateRfc2617Response(username: string, realm: string, password: string, 
+export function generateRfc2617Response(username: string, realm: string, password: string,
                                         nonce: string, uri: string, method: string) {
-    const ha1 = md5(username + ':' + realm + ':' + password)
-    const ha2 = md5(method + ':' + uri)
-    return md5(ha1 + ':' + nonce + ':' + ha2)
+    const ha1 = md5(`${username}:${realm}:${password}`)
+    const ha2 = md5(`${method}:${uri}`)
+    return md5(`${ha1}:${nonce}:${ha2}`)
 }
 
 export function getDecoderOptions(audioOptions: string[]) {
@@ -122,7 +122,7 @@ export function getDecoderOptions(audioOptions: string[]) {
     }
 }
 
-export function decryptAudioData(data: Buffer, audioAesKey: string, 
+export function decryptAudioData(data: Buffer, audioAesKey: string,
                                  audioAesIv: Buffer, headerSize = 12) {
     const tmp = new Buffer(16)
     const remainder = (data.length - headerSize) % 16

@@ -1,9 +1,10 @@
 import * as crypto from 'crypto'
 import { createSocket, Socket } from 'dgram'
 
-import * as tools from './helper'
-let debug = require('debug')('nodetunes:rtp')
+import { decryptAudioData } from './tools'
 import { RtspServer } from './rtsp'
+
+let debug = require('debug')('nodetunes:rtp')
 
 export class RtpServer {
 
@@ -38,8 +39,8 @@ export class RtpServer {
 
         this.baseServer.on('message', (msg: Buffer) => {
             const seq = msg.readUInt16BE(2)
-            const audio = tools.decryptAudioData(msg, this.rtspServer.audioAesKey,
-                                                 this.rtspServer.audioAesIv)
+            const audio = decryptAudioData(msg, this.rtspServer.audioAesKey,
+                                           this.rtspServer.audioAesIv)
             if (this.rtspServer.outputStream) {
                 this.rtspServer.outputStream.add(audio, seq)
             }

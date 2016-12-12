@@ -4,7 +4,7 @@ import * as ipaddr from 'ipaddr.js'
 import * as randomstring from 'randomstring'
 import { IncomingMessage, ServerResponse } from 'http'
 
-import * as tools from './helper'
+import * as tools from './tools'
 import { Transform } from 'stream'
 import { OutputStream } from './streams/output'
 import { PcmDecoderStream } from './streams/pcm'
@@ -12,9 +12,9 @@ import { RtspServer } from './rtsp'
 
 const debug = require('debug')('nodetunes:rtspmethods')
 
-const DECODER_STREAMS: { [x: string]: typeof Transform } = { 
-    '96 AppleLossless': AlacDecoderStream, 
-    '96 L16/44100/2': PcmDecoderStream 
+const DECODER_STREAMS: { [x: string]: typeof Transform } = {
+    '96 AppleLossless': AlacDecoderStream,
+    '96 L16/44100/2': PcmDecoderStream
 }
 
 function options(rtspServer: RtspServer, req: IncomingMessage, res: ServerResponse) {
