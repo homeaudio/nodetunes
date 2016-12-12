@@ -249,7 +249,7 @@ function getParameter(req, res) {
     res.send()
 }
 
-type MethodCallback = (req, res) => void
+export type MethodCallback = (req, res) => void
 
 export interface RtspMethods {
     OPTIONS: MethodCallback
