@@ -1,7 +1,6 @@
 import * as crypto from 'crypto'
 import * as fs from 'fs'
 import * as forge from 'node-forge'
-const rsa = forge.pki.rconst
 
 let debug = require('debug')('nodetunes:helper')
 
@@ -80,15 +79,15 @@ export function generateAppleResponse(challengeBuf, ipAddr, macAddr) {
     debug = require('debug')('nodetunes:helper') 
     debug('building challenge for %s (ip: %s, mac: %s)', challengeBuf.toString('base64'), ipAddr.toString('hex'), macAddr.toString('hex'))
 
-    let fullChallenge = Buffer.concat([challengeBuf, ipAddr, macAddr])
+    const fullChallengeUnpadded = Buffer.concat([challengeBuf, ipAddr, macAddr])
 
     // im sure there's an easier way to pad this buffer
     const padding = []
-    for (let i = fullChallenge.length; i < 32; i++) {
+    for (let i = fullChallengeUnpadded.length; i < 32; i++) {
         padding.push(0)
     }
 
-    fullChallenge = Buffer.concat([fullChallenge, new Buffer(padding)]).toString('binary')
+    const fullChallenge = Buffer.concat([fullChallengeUnpadded, new Buffer(padding)]).toString('binary')
     const response = forge.pki.rsa.encrypt(fullChallenge, PRIVATE_KEY, 0x01)
     debug('computed challenge: %s', forge.util.encode64(response))
 

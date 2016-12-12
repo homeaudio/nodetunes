@@ -53,7 +53,7 @@ function announceParse(rtspServer: RtspServer, req, res) {
 
         if (aKey == 'rsaaeskey') {
 
-            rtspServer.audioAesKey = tools.rsaPrivateKey.decrypt(new Buffer(aValue, 'base64').toString('binary'), 'RSA-OAEP')
+            rtspServer.audioAesKey = tools.PRIVATE_KEY.decrypt(new Buffer(aValue, 'base64').toString('binary'), 'RSA-OAEP')
 
         } else if (aKey == 'aesiv') {
 
