@@ -1,4 +1,3 @@
-'use strict'
 import * as crypto from 'crypto'
 import * as fs from 'fs'
 import * as forge from 'node-forge'
