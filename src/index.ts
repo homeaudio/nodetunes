@@ -2,9 +2,8 @@ import { EventEmitter } from 'events'
 import { createAdvertisement, Advertisement, tcp } from 'mdns'
 import { createServer, Server } from 'net'
 import * as portastic from 'portastic'
-import * as randomMac from 'random-mac'
-
 import { RtspServer } from './rtsp'
+import { randomMac } from './tools'
 
 let debug = require('debug')('nodetunes:server')
 

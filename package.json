@@ -39,7 +39,6 @@
     "node-forge": "^0.6.46",
     "portastic": "1.0.1",
     "priorityqueuejs": "1.0.0",
-    "random-mac": "0.0.4",
     "randomstring": "1.1.5"
   },
   "devDependencies": {
