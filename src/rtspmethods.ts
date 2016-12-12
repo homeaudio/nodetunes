@@ -1,7 +1,6 @@
 import * as AlacDecoderStream from 'alac2pcm'
 import * as crypto from 'crypto'
 import * as ipaddr from 'ipaddr.js'
-import * as randomstring from 'randomstring'
 import { IncomingMessage, ServerResponse } from 'http'
 
 import * as tools from './tools'
@@ -144,11 +143,11 @@ function announce(rtspServer: RtspServer, req, res) {
     } else if (rtspServer.options.password && !req.getHeader('Authorization')) {
 
         const md5sum = crypto.createHash('md5')
-        md5sum.update = randomstring.generate()
-        res.status(401)
-        nonce = md5sum.digest('hex').toString('hex')
+        md5sum.update(crypto.randomBytes(256))
+        nonce = md5sum.digest('hex')
 
-        res.set('WWW-Authenticate', 'Digest realm="roap", nonce="' + nonce + '"')
+        res.status(401)
+        res.set('WWW-Authenticate', `Digest realm="roap", nonce="${nonce}"`)
         res.send()
 
     } else if (rtspServer.options.password && req.getHeader('Authorization')) {
@@ -162,7 +161,9 @@ function announce(rtspServer: RtspServer, req, res) {
             map[pair[0]] = pair[1]
         })
 
-        const expectedResponse = tools.generateRfc2617Response('iTunes', 'roap', rtspServer.options.password, nonce, map.uri, 'ANNOUNCE')
+        const expectedResponse = tools.generateRfc2617Response('iTunes', 'roap',
+                                                               rtspServer.options.password,
+                                                               nonce, map.uri, 'ANNOUNCE')
         const receivedResponse = map.response
 
         if (expectedResponse === receivedResponse) {

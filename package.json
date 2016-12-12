@@ -38,15 +38,13 @@
     "mdns": "^2.3.3",
     "node-forge": "^0.6.46",
     "portastic": "1.0.1",
-    "priorityqueuejs": "1.0.0",
-    "randomstring": "1.1.5"
+    "priorityqueuejs": "1.0.0"
   },
   "devDependencies": {
     "@types/mdns": "0.0.31",
     "@types/node": "0.0.2",
     "@types/node-forge": "^0.6.5",
     "@types/priorityqueuejs": "^1.0.1",
-    "@types/randomstring": "^1.1.5",
     "mocha": "~1.18.2",
     "nodemon": "^1.11.0",
     "request": "~2.34.0",
