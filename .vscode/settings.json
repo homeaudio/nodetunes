@@ -1,3 +1,9 @@
 {
-    "typescript.tsdk": "./node_modules/typescript/lib"
+    "typescript.tsdk": "./node_modules/typescript/lib",
+    "files.trimTrailingWhitespace": true,
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/*.js": true,
+        "**/*.d.ts": true
+    }
 }
