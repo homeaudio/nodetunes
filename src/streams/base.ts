@@ -2,7 +2,7 @@ import * as PriorityQueue from 'priorityqueuejs'
 import { Readable } from 'stream'
 
 
-interface Data {
+export interface Data {
     chunk: any,
     sequenceNumber: number
 }

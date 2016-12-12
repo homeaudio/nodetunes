@@ -1,5 +1,6 @@
 import * as crypto from 'crypto'
-import * as dgram from 'dgram'
+import { createSocket, Socket } from 'dgram'
+
 
 const tools = require('./helper')
 let debug = require('debug')('nodetunes:rtp')
@@ -8,9 +9,9 @@ import { RtspServer } from './rtsp'
 export class RtpServer {
 
     rtspServer: RtspServer
-    baseServer: dgram.Socket
-    controlServer: dgram.Socket
-    timingServer: dgram.Socket
+    baseServer: Socket
+    controlServer: Socket
+    timingServer: Socket
     timeoutCounter: number
     timeoutChecker: NodeJS.Timer | null
 
@@ -25,9 +26,9 @@ export class RtpServer {
 
         const socketType = this.rtspServer.ipv6 ? 'udp6' : 'udp4'
 
-        this.baseServer = dgram.createSocket(socketType)
-        this.controlServer = dgram.createSocket(socketType)
-        this.timingServer = dgram.createSocket(socketType)
+        this.baseServer = createSocket(socketType)
+        this.controlServer = createSocket(socketType)
+        this.timingServer = createSocket(socketType)
 
         this.baseServer.bind(this.rtspServer.ports[0])
         this.controlServer.bind(this.rtspServer.ports[1])
