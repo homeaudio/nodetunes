@@ -1,14 +1,20 @@
-'use strict'
-
-const crypto = require('crypto')
-const dgram = require('dgram')
+import * as crypto from 'crypto'
+import * as dgram from 'dgram'
 
 const tools = require('./helper')
 let debug = require('debug')('nodetunes:rtp')
+import { RtspServer } from './rtsp'
 
-class RtpServer {
+export class RtpServer {
 
-    constructor(rtspServer) {
+    rtspServer: RtspServer
+    baseServer: dgram.Socket
+    controlServer: dgram.Socket
+    timingServer: dgram.Socket
+    timeoutCounter: number
+    timeoutChecker: NodeJS.Timer | null
+
+    constructor(rtspServer: RtspServer) {
         this.rtspServer = rtspServer
         // HACK: need to reload debug here (https://github.com/visionmedia/debug/issues/150)
         debug = require('debug')('nodetunes:rtp')
@@ -81,5 +87,3 @@ class RtpServer {
     }
 
 }
-
-module.exports = RtpServer

@@ -1,12 +1,12 @@
 'use strict'
-const crypto = require('crypto')
-const fs = require('fs')
-const forge = require('node-forge')
+import * as crypto from 'crypto'
+import * as fs from 'fs'
+import * as forge from 'node-forge'
 const rsa = forge.pki.rconst
 
 let debug = require('debug')('nodetunes:helper')
 
-function parseSdp(msg) {
+export function parseSdp(msg: string) {
     const multi = ['a', 'p', 'b']
     const lines = msg.split('\r\n')
     const output = {}
@@ -42,7 +42,7 @@ const DMAP_TYPES = {
     astm: 4,
 }
 
-function parseDmap(buffer) {
+export function parseDmap(buffer) {
     const output = {}
 
     for (let i = 8; i < buffer.length;) {
@@ -74,9 +74,9 @@ function getPrivateKey() {
     return forge.pki.privateKeyFromPem(keyFile)
 }
 
-const PRIVATE_KEY = getPrivateKey()
+export const PRIVATE_KEY = getPrivateKey()
 
-function generateAppleResponse(challengeBuf, ipAddr, macAddr) {
+export function generateAppleResponse(challengeBuf, ipAddr, macAddr) {
     // HACK: need to reload debug here (https://github.com/visionmedia/debug/issues/150)
     debug = require('debug')('nodetunes:helper') 
     debug('building challenge for %s (ip: %s, mac: %s)', challengeBuf.toString('base64'), ipAddr.toString('hex'), macAddr.toString('hex'))
@@ -97,17 +97,18 @@ function generateAppleResponse(challengeBuf, ipAddr, macAddr) {
 }
 
 
-function md5(content) {
+function md5(content: string) {
     return crypto.createHash('md5').update(content).digest().toString('hex')
 }
 
-function generateRfc2617Response(username, realm, password, nonce, uri, method) {
+export function generateRfc2617Response(username: string, realm: string, password: string, 
+                                        nonce: string, uri: string, method: string) {
     const ha1 = md5(username + ':' + realm + ':' + password)
     const ha2 = md5(method + ':' + uri)
     return md5(ha1 + ':' + nonce + ':' + ha2)
 }
 
-function getDecoderOptions(audioOptions) {
+export function getDecoderOptions(audioOptions: [string]) {
     return !audioOptions ? {} : {
         frameLength: parseInt(audioOptions[1], 10),
         compatibleVersion: parseInt(audioOptions[2], 10),
@@ -123,7 +124,7 @@ function getDecoderOptions(audioOptions) {
     }
 }
 
-function decryptAudioData(data, audioAesKey, audioAesIv, headerSize) {
+export function decryptAudioData(data, audioAesKey, audioAesIv, headerSize: number) {
     const tmp = new Buffer(16)
     if (!headerSize) {
         headerSize = 12
@@ -142,11 +143,3 @@ function decryptAudioData(data, audioAesKey, audioAesIv, headerSize) {
 
     return data.slice(headerSize)
 }
-
-module.exports.decryptAudioData = decryptAudioData
-module.exports.getDecoderOptions = getDecoderOptions
-module.exports.parseSdp = parseSdp
-module.exports.parseDmap = parseDmap
-module.exports.generateAppleResponse = generateAppleResponse
-module.exports.generateRfc2617Response = generateRfc2617Response
-module.exports.rsaPrivateKey = PRIVATE_KEY

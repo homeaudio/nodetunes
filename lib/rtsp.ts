@@ -1,25 +1,36 @@
-'use strict'
-
-const ServerParser = require('httplike')
-const net = require('net')
-const util = require('util')
-
-const tools = require('./helper')
-const RtpServer = require('./rtp')
+import * as ServerParser from 'httplike'
+import { inspect } from 'util'
+import { Socket } from 'net'
+import { RtpServer } from './rtp'
+import { mapRtspMethods, RtspMethods } from './rtspmethods'
+import { NodeTunes, NodeTunesOptions } from './server'
+import { OutputStream } from './streams/output'
 
 let debug = require('debug')('nodetunes:rtsp')
 const error = require('debug')('nodetunes:error')
 
-class RtspServer {
 
-    constructor(options, external) {
+export class RtspServer {
+
+    external: NodeTunes
+    options: NodeTunesOptions
+    rtp: RtpServer
+    macAddress: string
+    socket: Socket
+    handling: Socket | null
+    ports: number[] = []
+    outputStream: OutputStream | null
+    controlTimeout: number
+    clientConnected: Socket | null
+    ipv6 = false  // true iff ipv6 usage is detected.
+    methodMapping: RtspMethods
+
+    constructor(options: NodeTunesOptions, external: NodeTunes) {
         // HACK: need to reload debug here (https://github.com/visionmedia/debug/issues/150)
         debug = require('debug')('nodetunes:rtsp')
 
         this.external = external
         this.options = options
-
-        this.ports = []
 
         this.rtp = new RtpServer(this)
         this.macAddress = options.macAddress
@@ -30,10 +41,10 @@ class RtspServer {
         this.clientConnected = null
         this.controlTimeout = options.controlTimeout
 
-        this.methodMapping = require('./rtspmethods')(this)
+        this.methodMapping = mapRtspMethods(this)
     }
 
-    connectHandler(socket) {
+    connectHandler(socket: Socket) {
         if (this.handling && !this.clientConnected) {
             socket.end()
             return
@@ -51,15 +62,17 @@ class RtspServer {
             },
         })
 
-        parser.on('message', function (req, res) {
+        parser.on('message', (req, res) => {
 
             res.set('CSeq', req.getHeader('CSeq'))
             res.set('Server', 'AirTunes/105.1')
 
-            const method = this.methodMapping[req.method]
+            // TODO maybe this typing should be enforced further down?
+            const methodType: keyof RtspMethods = req.method
+            const method = this.methodMapping[methodType]
 
             if (method) {
-                debug('received method %s (CSeq: %s)\n%s', req.method, req.getHeader('CSeq'), util.inspect(req.headers))
+                debug('received method %s (CSeq: %s)\n%s', req.method, req.getHeader('CSeq'), inspect(req.headers))
                 method(req, res)
             } else {
                 error('received unknown method:', req.method)
@@ -67,7 +80,7 @@ class RtspServer {
                 socket.end()
             }
 
-        }.bind(this))
+        })
 
         socket.on('close', this.disconnectHandler.bind({ self: this, socket: socket }))
     }
@@ -105,5 +118,3 @@ class RtspServer {
     }
 
 }
-
-module.exports = RtspServer

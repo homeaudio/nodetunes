@@ -1,22 +1,28 @@
-'use strict'
+import * as PriorityQueue from 'priorityqueuejs'
+import { Readable } from 'stream'
 
-const PriorityQueue = require('priorityqueuejs')
-const Readable = require('readable-stream').Readable
 
-class BaseDecoderStream extends Readable {
+interface Data {
+    chunk: any,
+    sequenceNumber: number
+}
+
+export class BaseDecoderStream extends Readable {
+
+    isFlowing = true
+    bufferQueue: PriorityQueue<Data>
 
     constructor() {
         super()
-        this.isFlowing = true
-        this.bufferQueue = new PriorityQueue((a, b) => b.sequenceNumber -
-                                                       a.sequenceNumber)
+        this.bufferQueue = new PriorityQueue<Data>((a, b) => b.sequenceNumber -
+                                                             a.sequenceNumber)
     }
 
-    add(chunk, sequenceNumber, isRetransmit) {
+    add(chunk: any, sequenceNumber: number, isRetransmit?: boolean) {
         this._push({ chunk: chunk, sequenceNumber: sequenceNumber })
     }
 
-    _push(data) {
+    _push(data: Data) {
         if (this.isFlowing) {
             const result = this.push(data.chunk)
             if (!result) {
@@ -25,6 +31,7 @@ class BaseDecoderStream extends Readable {
             return result
         } else {
             this.bufferQueue.enq(data)
+            // TODO do we return true or false here?
         }
     }
 
@@ -37,5 +44,3 @@ class BaseDecoderStream extends Readable {
     }
 
 }
-
-module.exports = BaseDecoderStream

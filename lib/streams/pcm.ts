@@ -1,10 +1,8 @@
-'use strict'
+import { Transform } from 'stream'
 
-const Transform = require('readable-stream').Transform
+export class PcmDecoderStream extends Transform {
 
-class PcmDecoderStream extends Transform {
-
-    _transform(pcmData, enc, cb) {
+    _transform(pcmData: Buffer, encoding: string, callback: Function) {
         const swapBuf = new Buffer(pcmData.length)
 
         // endian hack
@@ -13,9 +11,7 @@ class PcmDecoderStream extends Transform {
             swapBuf[i + 1] = pcmData[i]
         }
 
-        cb(null, swapBuf)
+        callback(null, swapBuf)
     }
 
 }
-
-module.exports = PcmDecoderStream

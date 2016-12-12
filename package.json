@@ -18,7 +18,8 @@
   },
   "scripts": {
     "start": "node ./examples/server.js",
-    "test": "gulp test"
+    "test": "gulp test",
+    "build:live": "nodemon --exec ./node_modules/.bin/ts-node -- ./index.ts"
   },
   "repository": {
     "type": "git",
@@ -36,16 +37,23 @@
     "portastic": "1.0.1",
     "priorityqueuejs": "1.0.0",
     "random-mac": "0.0.4",
-    "randomstring": "1.1.5",
-    "readable-stream": "^2.2.2"
+    "randomstring": "1.1.5"
   },
   "devDependencies": {
+    "@types/mdns": "0.0.31",
+    "@types/node": "0.0.2",
+    "@types/node-forge": "^0.6.5",
+    "@types/priorityqueuejs": "^1.0.1",
+    "@types/randomstring": "^1.1.5",
     "gulp": "~3.6.2",
     "gulp-jscs": "^2.0.0",
     "gulp-mocha": "~0.4.1",
     "mocha": "~1.18.2",
+    "nodemon": "^1.11.0",
     "request": "~2.34.0",
-    "speaker": "0.2.6"
+    "speaker": "0.2.6",
+    "ts-node": "^1.7.2",
+    "typescript": "^2.1.4"
   },
   "license": "MIT"
 }

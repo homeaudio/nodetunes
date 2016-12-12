@@ -1,19 +1,23 @@
-'use strict'
+import * as AlacDecoderStream from 'alac2pcm'
+import * as crypto from 'crypto'
+import * as ipaddr from 'ipaddr.js'
+import * as randomstring from 'randomstring'
+import { IncomingMessage, ServerResponse } from 'http'
 
-const AlacDecoderStream = require('alac2pcm')
-const crypto = require('crypto')
-const ipaddr = require('ipaddr.js')
-const randomstring = require('randomstring')
-
-const tools = require('./helper')
-const OutputStream = require('./streams/output')
-const PcmDecoderStream = require('./streams/pcm')
+import * as tools from './helper'
+import { Transform } from 'stream'
+import { OutputStream } from './streams/output'
+import { PcmDecoderStream } from './streams/pcm'
+import { RtspServer } from './rtsp'
 
 const debug = require('debug')('nodetunes:rtspmethods')
 
-const DECODER_STREAMS = { '96 AppleLossless': AlacDecoderStream, '96 L16/44100/2': PcmDecoderStream }
+const DECODER_STREAMS: { [x: string]: typeof Transform } = { 
+    '96 AppleLossless': AlacDecoderStream, 
+    '96 L16/44100/2': PcmDecoderStream 
+}
 
-function options(rtspServer, req, res) {
+function options(rtspServer: RtspServer, req: IncomingMessage, res: ServerResponse) {
 
     res.set('Public', 'ANNOUNCE, SETUP, RECORD, PAUSE, FLUSH, TEARDOWN, OPTIONS, GET_PARAMETER, SET_PARAMETER, POST, GET')
 
@@ -38,7 +42,7 @@ function options(rtspServer, req, res) {
     res.send()
 }
 
-function announceParse(rtspServer, req, res) {
+function announceParse(rtspServer: RtspServer, req, res) {
 
     const sdp = tools.parseSdp(req.content.toString())
 
@@ -100,7 +104,7 @@ function announceParse(rtspServer, req, res) {
 }
 
 
-function setup(rtspServer, req, res) {
+function setup(rtspServer: RtspServer, req, res) {
     rtspServer.ports = []
 
     const getRandomPort = () => {
@@ -129,7 +133,7 @@ function setup(rtspServer, req, res) {
 let nonce = ''
 
 
-function announce(rtspServer, req, res) {
+function announce(rtspServer: RtspServer, req, res) {
     debug(req.content.toString())
 
     if (rtspServer.clientConnected) {
@@ -195,12 +199,12 @@ function flush(req, res) {
     res.send()
 }
 
-function teardown(rtspServer, req, res) {
+function teardown(rtspServer: RtspServer, req, res) {
     rtspServer.rtp.stop()
     res.send()
 }
 
-function setParameter(rtspServer, req, res) {
+function setParameter(rtspServer: RtspServer, req, res) {
     if (req.getHeader('Content-Type') == 'application/x-dmap-tagged') {
 
         // metadata dmap/daap format
@@ -245,8 +249,20 @@ function getParameter(req, res) {
     res.send()
 }
 
+type MethodCallback = (req, res) => void
 
-module.exports = function (rtspServer) {
+export interface RtspMethods {
+    OPTIONS: MethodCallback
+    ANNOUNCE: MethodCallback
+    SETUP: MethodCallback
+    RECORD: MethodCallback
+    FLUSH: MethodCallback
+    TEARDOWN: MethodCallback
+    SET_PARAMETER: MethodCallback
+    GET_PARAMETER: MethodCallback
+}
+
+export function mapRtspMethods(rtspServer: RtspServer): RtspMethods {
     return {
         OPTIONS: options.bind(null, rtspServer),
         ANNOUNCE: announce.bind(null, rtspServer),
