@@ -19,9 +19,11 @@
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
     "start": "node ./examples/server.js",
-    "test": "gulp test",
-    "build:live": "nodemon --exec ./node_modules/.bin/ts-node -- ./index.ts"
+    "build:live": "nodemon --exec ./node_modules/.bin/ts-node -- ./examples/server.ts",
+    "test": "gulp test"
   },
   "repository": {
     "type": "git",
