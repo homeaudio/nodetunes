@@ -1,15 +1,20 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "target": "es5",
+        "target": "es2015",
+        "outDir": "lib/",
+        "declaration": true,
         "noImplicitAny": true,
         "sourceMap": true,
-        "allowJs": true,
+        "allowJs": false,
         "noFallthroughCasesInSwitch": true,
         "noImplicitReturns": true,
         "noImplicitThis": true,
         "strictNullChecks": true
     },
+    "files": [
+        "./src/index.ts"
+    ],
     "exclude": [
         "node_modules"
     ]

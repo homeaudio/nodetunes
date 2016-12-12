@@ -1,3 +1,6 @@
+# Ignore compiled output
+lib
+
 lib-cov
 lcov.info
 *.seed
@@ -18,3 +21,4 @@ build
 
 node_modules
 .DS_STORE
+
