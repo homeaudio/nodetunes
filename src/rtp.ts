@@ -1,10 +1,11 @@
 import * as crypto from 'crypto'
+import * as debug from 'debug'
 import { createSocket, Socket } from 'dgram'
 
 import { decryptAudioData } from './tools'
 import { RtspServer } from './rtsp'
 
-let debug = require('debug')('nodetunes:rtp')
+const log = debug('nodetunes:rtp')
 
 export class RtpServer {
 
@@ -17,12 +18,11 @@ export class RtpServer {
 
     constructor(rtspServer: RtspServer) {
         this.rtspServer = rtspServer
-        // HACK: need to reload debug here (https://github.com/visionmedia/debug/issues/150)
-        debug = require('debug')('nodetunes:rtp')
+
     }
 
     start() {
-        debug('starting rtp servers')
+        log('starting rtp servers')
 
         const socketType = this.rtspServer.ipv6 ? 'udp6' : 'udp4'
 
@@ -74,7 +74,7 @@ export class RtpServer {
     stop() {
         if (this.baseServer) {
 
-            debug('stopping rtp servers')
+            log('stopping rtp servers')
 
             try {
                 if (this.timeoutChecker) {

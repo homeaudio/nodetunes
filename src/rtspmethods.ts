@@ -1,15 +1,16 @@
 import * as AlacDecoderStream from 'alac2pcm'
 import * as crypto from 'crypto'
-import * as ipaddr from 'ipaddr.js'
+import * as debug from 'debug'
 import { IncomingMessage, ServerResponse } from 'http'
-
-import * as tools from './tools'
+import * as ipaddr from 'ipaddr.js'
 import { Transform } from 'stream'
+
+import { RtspServer } from './rtsp'
 import { OutputStream } from './streams/output'
 import { PcmDecoderStream } from './streams/pcm'
-import { RtspServer } from './rtsp'
+import * as tools from './tools'
 
-const debug = require('debug')('nodetunes:rtspmethods')
+const log = require('debug')('nodetunes:rtspmethods')
 
 const DECODER_STREAMS: { [x: string]: typeof Transform } = {
     '96 AppleLossless': AlacDecoderStream,
@@ -79,13 +80,13 @@ function announceParse(rtspServer: RtspServer, req, res) {
 
     if (sdp.i) {
         rtspServer.metadata.clientName = sdp.i
-        debug('client name reported (%s)', rtspServer.metadata.clientName)
+        log('client name reported (%s)', rtspServer.metadata.clientName)
         rtspServer.external.emit('clientNameChange', sdp.i)
     }
 
     if (sdp.c) {
         if (sdp.c.indexOf('IP6') !== -1) {
-            debug('ipv6 usage detected')
+            log('ipv6 usage detected')
             rtspServer.ipv6 = true
         }
     }
@@ -95,7 +96,7 @@ function announceParse(rtspServer: RtspServer, req, res) {
 
     rtspServer.clientConnected = res.socket
     rtspServer.outputStream = new OutputStream()
-    debug('client considered connected')
+    log('client considered connected')
     rtspServer.outputStream.setDecoder(decoderStream)
     rtspServer.external.emit('clientConnected', rtspServer.outputStream)
 
@@ -118,7 +119,7 @@ function setup(rtspServer: RtspServer, req, res) {
 
         rtspServer.rtp.start()
 
-        debug('setting udp ports (audio: %s, control: %s, timing: %s)', rtspServer.ports[0], rtspServer.ports[1], rtspServer.ports[2])
+        log('setting udp ports (audio: %s, control: %s, timing: %s)', rtspServer.ports[0], rtspServer.ports[1], rtspServer.ports[2])
 
         res.set('Transport', 'RTP/AVP/UDP;unicast;mode=record;server_port=' + rtspServer.ports[0] + ';control_port=' + rtspServer.ports[1] + ';timing_port=' + rtspServer.ports[2])
         res.set('Session', '1')
@@ -133,11 +134,11 @@ let nonce = ''
 
 
 function announce(rtspServer: RtspServer, req, res) {
-    debug(req.content.toString())
+    log(req.content.toString())
 
     if (rtspServer.clientConnected) {
 
-        debug('already streaming; rejecting new client')
+        log('already streaming; rejecting new client')
         res.status(453).send()
 
     } else if (rtspServer.options.password && !req.getHeader('Authorization')) {
@@ -213,20 +214,20 @@ function setParameter(rtspServer: RtspServer, req, res) {
         const dmapData = tools.parseDmap(req.content)
         rtspServer.metadata = dmapData
         rtspServer.external.emit('metadataChange', rtspServer.metadata)
-        debug('received metadata (%s)', JSON.stringify(rtspServer.metadata))
+        log('received metadata (%s)', JSON.stringify(rtspServer.metadata))
 
     } else if (req.getHeader('Content-Type') == 'image/jpeg') {
 
         rtspServer.metadata.artwork = req.content
         rtspServer.external.emit('artworkChange', req.content)
-        debug('received artwork (length: %s)', rtspServer.metadata.artwork.length)
+        log('received artwork (length: %s)', rtspServer.metadata.artwork.length)
 
     } else if (req.getHeader('Content-Type') == 'text/parameters') {
 
         const data = req.content.toString().split(': ')
         rtspServer.metadata = rtspServer.metadata || {}
 
-        debug('received text metadata (%s: %s)', data[0], data[1].trim())
+        log('received text metadata (%s: %s)', data[0], data[1].trim())
 
         if (data[0] == 'volume') {
             rtspServer.metadata.volume = parseFloat(data[1])
@@ -240,14 +241,14 @@ function setParameter(rtspServer: RtspServer, req, res) {
         }
 
     } else {
-        debug('uncaptured SET_PARAMETER method: %s', req.content.toString().trim())
+        log('uncaptured SET_PARAMETER method: %s', req.content.toString().trim())
     }
 
     res.send()
 }
 
 function getParameter(req, res) {
-    debug('uncaptured GET_PARAMETER method: %s', req.content.toString().trim())
+    log('uncaptured GET_PARAMETER method: %s', req.content.toString().trim())
     res.send()
 }
 

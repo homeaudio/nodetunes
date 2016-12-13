@@ -1,8 +1,9 @@
 import * as crypto from 'crypto'
 import * as fs from 'fs'
 import * as forge from 'node-forge'
+import * as debug from 'debug'
 
-let debug = require('debug')('nodetunes:helper')
+const log = debug('nodetunes:tools')
 
 export function parseSdp(msg: string) {
     const multi = ['a', 'p', 'b']
@@ -75,9 +76,7 @@ function getPrivateKey() {
 export const PRIVATE_KEY = getPrivateKey()
 
 export function generateAppleResponse(challengeBuf: Buffer, ipAddr: Buffer, macAddr: Buffer) {
-    // HACK: need to reload debug here (https://github.com/visionmedia/debug/issues/150)
-    debug = require('debug')('nodetunes:helper')
-    debug('building challenge for %s (ip: %s, mac: %s)', challengeBuf.toString('base64'), ipAddr.toString('hex'), macAddr.toString('hex'))
+    log('building challenge for %s (ip: %s, mac: %s)', challengeBuf.toString('base64'), ipAddr.toString('hex'), macAddr.toString('hex'))
 
     const fullChallengeUnpadded = Buffer.concat([challengeBuf, ipAddr, macAddr])
 
@@ -89,7 +88,7 @@ export function generateAppleResponse(challengeBuf: Buffer, ipAddr: Buffer, macA
 
     const fullChallenge = Buffer.concat([fullChallengeUnpadded, new Buffer(padding)]).toString('binary')
     const response = forge.pki.rsa.encrypt(fullChallenge, PRIVATE_KEY, 0x01)
-    debug('computed challenge: %s', forge.util.encode64(response))
+    log('computed challenge: %s', forge.util.encode64(response))
 
     return forge.util.encode64(response)
 }

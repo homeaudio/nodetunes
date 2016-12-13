@@ -1,3 +1,4 @@
+import * as debug from 'debug'
 import { EventEmitter } from 'events'
 import { createAdvertisement, Advertisement, tcp } from 'mdns'
 import { createServer, Server } from 'net'
@@ -5,7 +6,7 @@ import * as portastic from 'portastic'
 import { RtspServer } from './rtsp'
 import { randomMac } from './tools'
 
-let debug = require('debug')('nodetunes:server')
+let log = debug('nodetunes:NodeTunes')
 
 function geneate_txt_record(password: string | null) {
     const pw = (password !== null) ? 'true' : 'false'
@@ -64,9 +65,8 @@ export class NodeTunes extends EventEmitter {
         this.options = {...options, ...default_options()}
 
         if (this.options.verbose) {
-            require('debug').enable('nodetunes:*')
-            // HACK: need to reload debug here (https://github.com/visionmedia/debug/issues/150)
-            debug = require('debug')('nodetunes:server')
+            debug.enable('nodetunes:*')
+            log = debug('nodetunes:server')
         }
 
         this.netServer = null
@@ -80,8 +80,8 @@ export class NodeTunes extends EventEmitter {
         portastic.find({
             min: 5000,
             max: 5050,
-            retrieve: 1,
-        }).then((ports: number[]) => {
+            retrieve: 1
+        }).then(ports => {
             const port = ports[0]
             this.netServer = createServer(this.rtspServer.connectHandler.bind(this.rtspServer))
 
@@ -111,7 +111,7 @@ export class NodeTunes extends EventEmitter {
                         macAddress: this.options.macAddress,
                     })
                 }
-                debug('broadcasting mdns advertisement (for port %s)', port)
+                log('broadcasting mdns advertisement (for port %s)', port)
 
             })
 
@@ -126,7 +126,7 @@ export class NodeTunes extends EventEmitter {
     }
 
     stop() {
-        debug('stopping nodetunes server')
+        log('stopping nodetunes server')
         if (this.netServer) {
             this.netServer.close()
         }

@@ -41,6 +41,7 @@
     "priorityqueuejs": "1.0.0"
   },
   "devDependencies": {
+    "@types/debug": "0.0.29",
     "@types/mdns": "0.0.31",
     "@types/node": "0.0.2",
     "@types/node-forge": "^0.6.5",

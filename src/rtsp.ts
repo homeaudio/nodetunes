@@ -1,4 +1,5 @@
 import { ServerParser } from 'httplike'
+import * as debug from 'debug'
 import { inspect } from 'util'
 import { Socket } from 'net'
 import { RtpServer } from './rtp'
@@ -6,9 +7,8 @@ import { mapRtspMethods, RtspMethods } from './rtspmethods'
 import { NodeTunes, NodeTunesOptions } from '.'
 import { OutputStream } from './streams/output'
 
-let debug = require('debug')('nodetunes:rtsp')
-const error = require('debug')('nodetunes:error')
-
+const log = debug('nodetunes:rtsp')
+const error = debug('nodetunes:error')
 
 export interface RtspMetadata {
     artwork?: Buffer
@@ -38,8 +38,6 @@ export class RtspServer {
     metadata: RtspMetadata = {}
 
     constructor(options: NodeTunesOptions, external: NodeTunes) {
-        // HACK: need to reload debug here (https://github.com/visionmedia/debug/issues/150)
-        debug = require('debug')('nodetunes:rtsp')
         this.external = external
         this.options = options
         this.rtp = new RtpServer(this)
@@ -76,7 +74,7 @@ export class RtspServer {
             const method = this.methodMapping[methodType]
 
             if (method) {
-                debug('received method %s (CSeq: %s)\n%s', req.method, req.getHeader('CSeq'), inspect(req.headers))
+                log('received method %s (CSeq: %s)\n%s', req.method, req.getHeader('CSeq'), inspect(req.headers))
                 method(req, res)
             } else {
                 error('received unknown method:', req.method)
@@ -90,7 +88,7 @@ export class RtspServer {
     }
 
     timeoutHandler() {
-        debug('client timeout detected (no ping in %s seconds)', this.controlTimeout)
+        log('client timeout detected (no ping in %s seconds)', this.controlTimeout)
         if (this.clientConnected)
             this.clientConnected.destroy()
     }
@@ -104,7 +102,7 @@ export class RtspServer {
 
         // handle case where "connected" client has been disconnected
         if (this.socket === this.clientConnected) {
-            debug('client disconnected')
+            log('client disconnected')
 
             this.clientConnected = null
             this.outputStream = null
