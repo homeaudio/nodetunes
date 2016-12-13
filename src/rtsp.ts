@@ -1,4 +1,4 @@
-import * as ServerParser from 'httplike'
+import { ServerParser } from 'httplike'
 import { inspect } from 'util'
 import { Socket } from 'net'
 import { RtpServer } from './rtp'
@@ -86,7 +86,7 @@ export class RtspServer {
 
         })
 
-        socket.on('close', this.disconnectHandler.bind({ self: this, socket: socket }))
+        socket.on('close', () => this.disconnectHandler(socket))
     }
 
     timeoutHandler() {
@@ -95,24 +95,21 @@ export class RtspServer {
             this.clientConnected.destroy()
     }
 
-    disconnectHandler() {
-        // keep in mind 'this' is bound to an object that looks like { self: this, socket: socket }
-        // (see above)
-
+    disconnectHandler(socket: Socket) {
         // handle case where multiple connections are being sought,
         // but none have fully connected yet
-        if (this.socket === this.self.handling) {
-            this.self.handling = null
+        if (socket === this.handling) {
+            this.handling = null
         }
 
         // handle case where "connected" client has been disconnected
-        if (this.socket === this.self.clientConnected) {
+        if (this.socket === this.clientConnected) {
             debug('client disconnected')
 
-            this.self.clientConnected = null
-            this.self.outputStream = null
-            this.self.rtp.stop()
-            this.self.external.emit('clientDisconnected')
+            this.clientConnected = null
+            this.outputStream = null
+            this.rtp.stop()
+            this.external.emit('clientDisconnected')
         }
 
     }
