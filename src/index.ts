@@ -62,7 +62,7 @@ export class NodeTunes extends EventEmitter {
 
     constructor(options: Partial<NodeTunesOptions> = {}) {
         super()
-        this.options = {...options, ...default_options()}
+        this.options = {...default_options(), ...options}
 
         if (this.options.verbose) {
             debug.enable('nodetunes:*')
