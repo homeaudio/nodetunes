@@ -19,14 +19,14 @@ const DECODER_STREAMS: { [x: string]: typeof Transform } = {
 
 function options(rtspServer: RtspServer, req: ServerRequest, res: Response) {
 
-    res.headers['Public'] = 'ANNOUNCE, SETUP, RECORD, PAUSE, FLUSH, TEARDOWN, OPTIONS, GET_PARAMETER, SET_PARAMETER, POST, GET'
+    res.headers['public'] = 'ANNOUNCE, SETUP, RECORD, PAUSE, FLUSH, TEARDOWN, OPTIONS, GET_PARAMETER, SET_PARAMETER, POST, GET'
 
-    if (req.headers['Apple-Challenge']) {
+    if (req.headers['apple-challenge']) {
 
         // challenge response consists of challenge + ip address + mac address + padding to 32 bytes,
         // encrypted with the ApEx private key (private encryption mode w/ PKCS1 padding)
 
-        const challengeBuf = new Buffer(req.headers['Apple-Challenge'], 'base64')
+        const challengeBuf = new Buffer(req.headers['apple-challenge'], 'base64')
 
         let ipAddrRepr = ipaddr.parse(rtspServer.socket.address().address)
         if (ipAddrRepr.kind() === 'ipv6' && ipAddrRepr.isIPv4MappedAddress()) {
@@ -36,7 +36,7 @@ function options(rtspServer: RtspServer, req: ServerRequest, res: Response) {
         const ipAddr = new Buffer(ipAddrRepr.toByteArray())
 
         const macAddr = new Buffer(rtspServer.macAddress.replace(/:/g, ''), 'hex')
-        res.headers['Apple-Response'] = tools.generateAppleResponse(challengeBuf, ipAddr, macAddr)
+        res.headers['apple-response'] = tools.generateAppleResponse(challengeBuf, ipAddr, macAddr)
     }
 
     res.send()
@@ -122,9 +122,9 @@ function setup(rtspServer: RtspServer, req: ServerRequest, res: Response) {
 
         log('setting udp ports (audio: %s, control: %s, timing: %s)', rtspServer.ports[0], rtspServer.ports[1], rtspServer.ports[2])
 
-        res.headers['Transport'] = 'RTP/AVP/UDP;unicast;mode=record;server_port=' + rtspServer.ports[0] + ';control_port=' + rtspServer.ports[1] + ';timing_port=' + rtspServer.ports[2]
-        res.headers['Session'] = '1'
-        res.headers['Audio-Jack-Status'] = 'connected'
+        res.headers['transport'] = 'RTP/AVP/UDP;unicast;mode=record;server_port=' + rtspServer.ports[0] + ';control_port=' + rtspServer.ports[1] + ';timing_port=' + rtspServer.ports[2]
+        res.headers['session'] = '1'
+        res.headers['audio-jack-status'] = 'connected'
         res.send()
 
     }
@@ -143,19 +143,19 @@ function announce(rtspServer: RtspServer, req: ServerRequest, res: Response) {
         res.statusCode = 453
         res.send()
 
-    } else if (rtspServer.options.password && !req.headers['Authorization']) {
+    } else if (rtspServer.options.password && !req.headers['authorization']) {
 
         const md5sum = crypto.createHash('md5')
         md5sum.update(crypto.randomBytes(256))
         nonce = md5sum.digest('hex')
 
         res.statusCode = 401
-        res.headers['WWW-Authenticate'] = `Digest realm="roap", nonce="${nonce}"`
+        res.headers['www-authenticate'] = `Digest realm="roap", nonce="${nonce}"`
         res.send()
 
-    } else if (rtspServer.options.password && req.headers['Authorization']) {
+    } else if (rtspServer.options.password && req.headers['authorization']) {
 
-        const auth = req.headers['Authorization']
+        const auth = req.headers['authorization']
 
         const params = auth.split(/, /g)
         const map = {}
@@ -182,18 +182,18 @@ function announce(rtspServer: RtspServer, req: ServerRequest, res: Response) {
 }
 
 function record(req: ServerRequest, res: Response) {
-    if (!req.headers['RTP-Info']) {
+    if (!req.headers['rtp-info']) {
         // jscs:disable
         // it seems like iOS airplay does something else
     } else {
-        const rtpInfo = req.headers['RTP-Info'].split(';')
+        const rtpInfo = req.headers['rtp-info'].split(';')
         const initSeq = rtpInfo[0].split('=')[1]
         const initRtpTime = rtpInfo[1].split('=')[1]
         if (!initSeq || !initRtpTime) {
             res.statusCode = 400
             res.send()
         } else {
-            res.headers['Audio-Latency'] = '0' // FIXME
+            res.headers['audio-latency'] = '0' // FIXME
         }
     }
 
@@ -201,7 +201,7 @@ function record(req: ServerRequest, res: Response) {
 }
 
 function flush(req: ServerRequest, res: Response) {
-    res.headers['RTP-Info'] = 'rtptime=1147914212' // FIXME
+    res.headers['rtp-info'] = 'rtptime=1147914212' // FIXME
     res.send()
 }
 
@@ -212,7 +212,7 @@ function teardown(rtspServer: RtspServer, req: ServerRequest, res: Response) {
 
 
 function setParameter(rtspServer: RtspServer, req: ServerRequest, res: Response) {
-    if (req.headers['Content-Type'] == 'application/x-dmap-tagged') {
+    if (req.headers['content-type'] == 'application/x-dmap-tagged') {
 
         // metadata dmap/daap format
         const dmapData = tools.parseDmap(req.content)
@@ -220,13 +220,13 @@ function setParameter(rtspServer: RtspServer, req: ServerRequest, res: Response)
         rtspServer.external.emit('metadataChange', rtspServer.metadata)
         log('received metadata (%s)', JSON.stringify(rtspServer.metadata))
 
-    } else if (req.headers['Content-Type'] == 'image/jpeg') {
+    } else if (req.headers['content-type'] == 'image/jpeg') {
 
         rtspServer.metadata.artwork = req.content
         rtspServer.external.emit('artworkChange', req.content)
         log('received artwork (length: %s)', rtspServer.metadata.artwork.length)
 
-    } else if (req.headers['Content-Type'] == 'text/parameters') {
+    } else if (req.headers['content-type'] == 'text/parameters') {
 
         const data = req.content.toString().split(': ')
         rtspServer.metadata = rtspServer.metadata || {}

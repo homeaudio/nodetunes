@@ -67,15 +67,15 @@ export class RtspServer {
 
         parser.on('message', (req: ServerRequest, res: Response) => {
 
-            res.headers['CSeq'] = req.headers['CSeq']
-            res.headers['Server'] = 'AirTunes/105.1'
+            res.headers['cseq'] = req.headers['cseq']
+            res.headers['server'] = 'AirTunes/105.1'
 
             // TODO maybe this typing should be enforced further down?
             const methodType: keyof RtspMethods = req.method
             const method = this.methodMapping[methodType]
 
             if (method) {
-                log('received method %s (CSeq: %s)\n%s', req.method, req.headers['CSeq'], inspect(req.headers))
+                log(`received method ${req.method} (CSeq: ${req.headers['cseq']})\n${inspect(req.headers)}`)
                 method(req, res)
             } else {
                 error('received unknown method:', req.method)
