@@ -38,7 +38,6 @@ export interface NodeTunesOptions {
     recordMetrics: boolean
     controlTimeout: number
     password: string | null
-    verbose: boolean
 }
 
 function default_options(): NodeTunesOptions {
@@ -48,7 +47,6 @@ function default_options(): NodeTunesOptions {
         recordDumps: false,
         recordMetrics: false,
         controlTimeout: 5,
-        verbose: false,
         password: null
     }
 }
@@ -57,25 +55,18 @@ export class NodeTunes extends EventEmitter {
 
     options: NodeTunesOptions
     rtspServer: RtspServer
-    netServer: Server | null
+    netServer: Server | null = null
     advertisement: Advertisement
 
     constructor(options: Partial<NodeTunesOptions> = {}) {
         super()
         this.options = {...default_options(), ...options}
-
-        if (this.options.verbose) {
-            debug.enable('nodetunes:*')
-            log = debug('nodetunes:server')
-        }
-
-        this.netServer = null
         this.rtspServer = new RtspServer(this.options, this)
     }
 
     start(callback: Function) {
 
-        console.log('starting nodetunes server (%s)', this.options.serverName)
+        console.log(`Starting nodetunes server (${this.options.serverName})`)
 
         portastic.find({
             min: 5000,
