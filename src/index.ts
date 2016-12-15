@@ -85,7 +85,8 @@ export class NodeTunes extends EventEmitter {
             const port = ports[0]
             this.netServer = createServer(this.rtspServer.connectHandler.bind(this.rtspServer))
 
-            this.netServer.on('error', err => {
+            // Nasty type escape as we know the error code is present
+            this.netServer.on('error', (err: any) => {
                 if (err.code == 'EADDRINUSE') {
                     // we didn't get the port we wanted - probably a race condition on the port.
                     // Wait a second and try again.
