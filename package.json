@@ -21,8 +21,8 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
+    "lint": "tslint -c tslint.json ./src/*.ts",
     "start": "node ./examples/server.js",
-    "build:live": "nodemon --exec ./node_modules/.bin/ts-node -- ./examples/server.ts",
     "test": "gulp test"
   },
   "repository": {
@@ -47,10 +47,9 @@
     "@types/node-forge": "^0.6.5",
     "@types/priorityqueuejs": "^1.0.1",
     "mocha": "~1.18.2",
-    "nodemon": "^1.11.0",
     "request": "~2.34.0",
     "speaker": "0.2.6",
-    "ts-node": "^1.7.2",
+    "tslint": "^4.1.0",
     "typescript": "^2.1.4"
   },
   "license": "MIT"

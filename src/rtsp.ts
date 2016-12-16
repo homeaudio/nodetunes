@@ -55,7 +55,7 @@ export class RtspServer {
         this.socket = socket
         this.handling = this.socket
 
-        // I don't think this guy is needed?
+        // TODO don't think this guy is needed?
         // socket.id = new Date().getTime()
 
         const parser = new ServerParser(socket, {

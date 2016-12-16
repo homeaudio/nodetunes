@@ -19,7 +19,7 @@ export class BaseDecoderStream extends Readable {
     }
 
     add(chunk: any, sequenceNumber: number, isRetransmit?: boolean) {
-        this._push({ chunk: chunk, sequenceNumber: sequenceNumber })
+        this._push({ chunk, sequenceNumber })
     }
 
     _push(data: Data) {
@@ -37,9 +37,13 @@ export class BaseDecoderStream extends Readable {
 
     _read() {
         this.isFlowing = true
-        if (this.bufferQueue.size() === 0) return
+        if (this.bufferQueue.size() === 0) {
+            return
+        }
         while (this.bufferQueue.size() > 0) {
-            if (!this._push(this.bufferQueue.deq())) return
+            if (!this._push(this.bufferQueue.deq())) {
+                return
+            }
         }
     }
 
