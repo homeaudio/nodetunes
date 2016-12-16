@@ -91,8 +91,9 @@ export class RtspServer {
 
     timeoutHandler() {
         log('client timeout detected (no ping in %s seconds)', this.controlTimeout)
-        if (this.clientConnected)
+        if (this.clientConnected) {
             this.clientConnected.destroy()
+        }
     }
 
     disconnectHandler(socket: Socket) {

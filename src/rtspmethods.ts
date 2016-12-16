@@ -10,11 +10,11 @@ import { OutputStream } from './streams/output'
 import { PcmDecoderStream } from './streams/pcm'
 import * as tools from './tools'
 
-const log = require('debug')('nodetunes:rtspmethods')
+const log = debug('nodetunes:rtspmethods')
 
 const DECODER_STREAMS: { [x: string]: typeof Transform } = {
     '96 AppleLossless': AlacDecoderStream,
-    '96 L16/44100/2': PcmDecoderStream
+    '96 L16/44100/2': PcmDecoderStream,
 }
 
 function options(rtspServer: RtspServer, req: ServerRequest, res: Response) {
@@ -53,27 +53,27 @@ function announceParse(rtspServer: RtspServer, req: ServerRequest, res: Response
         const aKey = sdp["a"][i].substring(0, spIndex)
         const aValue = sdp["a"][i].substring(spIndex + 1)
 
-        if (aKey == 'rsaaeskey') {
+        if (aKey === 'rsaaeskey') {
 
             rtspServer.audioAesKey = tools.PRIVATE_KEY.decrypt(new Buffer(aValue, 'base64').toString('binary'), 'RSA-OAEP')
 
-        } else if (aKey == 'aesiv') {
+        } else if (aKey === 'aesiv') {
 
             rtspServer.audioAesIv = new Buffer(aValue, 'base64')
 
-        } else if (aKey == 'rtpmap') {
+        } else if (aKey === 'rtpmap') {
 
             rtspServer.audioCodec = aValue
 
             if (aValue.indexOf('L16') === -1 && aValue.indexOf('AppleLossless') === -1) {
-                //PCM: L16/(...)
-                //ALAC: 96 AppleLossless
+                // PCM: L16/(...)
+                // ALAC: 96 AppleLossless
                 rtspServer.external.emit('error', { code: 415, message: 'Codec not supported (' + aValue + ')' })
                 res.statusCode = 415
                 res.send()
             }
 
-        } else if (aKey == 'fmtp') {
+        } else if (aKey === 'fmtp') {
 
             rtspServer.audioOptions = aValue.split(' ')
 
@@ -218,7 +218,7 @@ function setParameter(rtspServer: RtspServer, req: ServerRequest, res: Response)
             throw new Error("Expected to find content for setParameter but found none")
     }
 
-    if (req.headers['content-type'] == 'application/x-dmap-tagged') {
+    if (req.headers['content-type'] === 'application/x-dmap-tagged') {
 
         // metadata dmap/daap format
         const dmapData = tools.parseDmap(req.content)
@@ -226,24 +226,24 @@ function setParameter(rtspServer: RtspServer, req: ServerRequest, res: Response)
         rtspServer.external.emit('metadataChange', rtspServer.metadata)
         log('received metadata (%s)', JSON.stringify(rtspServer.metadata))
 
-    } else if (req.headers['content-type'] == 'image/jpeg') {
+    } else if (req.headers['content-type'] === 'image/jpeg') {
 
         rtspServer.metadata.artwork = req.content
         rtspServer.external.emit('artworkChange', req.content)
         log('received artwork (length: %s)', rtspServer.metadata.artwork.length)
 
-    } else if (req.headers['content-type'] == 'text/parameters') {
+    } else if (req.headers['content-type'] === 'text/parameters') {
 
         const data = req.content.toString().split(': ')
         rtspServer.metadata = rtspServer.metadata || {}
 
         log('received text metadata (%s: %s)', data[0], data[1].trim())
 
-        if (data[0] == 'volume') {
+        if (data[0] === 'volume') {
             rtspServer.metadata.volume = parseFloat(data[1])
             rtspServer.external.emit('volumeChange', rtspServer.metadata.volume)
 
-        } else if (data[0] == 'progress') {
+        } else if (data[0] === 'progress') {
 
             rtspServer.metadata.progress = data[1]
             rtspServer.external.emit('progressChange', rtspServer.metadata.progress)

@@ -26,7 +26,6 @@
     "no-var-keyword": true,
     "object-literal-key-quotes": [true, "as-needed"],
     "object-literal-shorthand": true,
-    "object-literal-sort-keys": true,
     "one-line": [
       true,
       "check-catch",

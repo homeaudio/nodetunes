@@ -13,11 +13,11 @@ export function parseSdp(msg: string) {
     for (let i = 0; i < lines.length; i++) {
 
         const sp = lines[i].split(/=(.+)?/)
-        if (sp.length == 3) { // for some reason there's an empty item?
-            if (multi.indexOf(sp[0]) != -1) { // some attributes are multiline...
-                if (!output[sp[0]])
+        if (sp.length === 3) { // for some reason there's an empty item?
+            if (multi.indexOf(sp[0]) !== -1) { // some attributes are multiline...
+                if (!output[sp[0]]) {
                     output[sp[0]] = []
-
+                }
                 output[sp[0]].push(sp[1])
             } else {
                 output[sp[0]] = sp[1]
@@ -43,21 +43,21 @@ const DMAP_TYPES = {
 
 export function parseDmap(buffer: Buffer) {
     const output = {}
-
-    for (let i = 8; i < buffer.length;) {
+    let i = 8
+    while (i < buffer.length) {
         const itemType = buffer.slice(i, i + 4)
         const itemLength = buffer.slice(i + 4, i + 8).readUInt32BE(0)
         if (itemLength !== 0) {
             const data = buffer.slice(i + 8, i + 8 + itemLength)
-            if (DMAP_TYPES[itemType] == 'str') {
+            if (DMAP_TYPES[itemType] === 'str') {
                 output[itemType.toString()] = data.toString()
-            } else if (DMAP_TYPES[itemType] == 1) {
+            } else if (DMAP_TYPES[itemType] === 1) {
                 output[itemType.toString()] = data.readUInt8(0)
-            } else if (DMAP_TYPES[itemType] == 2) {
+            } else if (DMAP_TYPES[itemType] === 2) {
                 output[itemType.toString()] = data.readUInt16BE(0)
-            } else if (DMAP_TYPES[itemType] == 4) {
+            } else if (DMAP_TYPES[itemType] === 4) {
                 output[itemType.toString()] = data.readUInt32BE(0)
-            } else if (DMAP_TYPES[itemType] == 8) {
+            } else if (DMAP_TYPES[itemType] === 8) {
                 output[itemType.toString()] = (data.readUInt32BE(0) << 8) + data.readUInt32BE(4)
             }
         }
@@ -117,7 +117,7 @@ export function getDecoderOptions(audioOptions: string[]) {
         maxRun: parseInt(audioOptions[8], 10),
         maxFrameBytes: parseInt(audioOptions[9], 10),
         avgBitRate: parseInt(audioOptions[10], 10),
-        sampleRate: parseInt(audioOptions[11], 10)
+        sampleRate: parseInt(audioOptions[11], 10),
     }
 }
 
@@ -131,7 +131,8 @@ export function decryptAudioData(data: Buffer, audioAesKey: string,
     const decipher = crypto.createDecipheriv('aes-128-cbc', audioAesKeyBuffer, audioAesIv)
     decipher.setAutoPadding(false)
 
-    for (let i = headerSize, l = endOfEncodedData - 16; i <= l; i += 16) {
+    const l = endOfEncodedData - 16
+    for (let i = headerSize; i <= l; i += 16) {
         data.copy(tmp, 0, i, i + 16)
         decipher.update(tmp).copy(data, i, 0, 16)
     }
@@ -139,13 +140,15 @@ export function decryptAudioData(data: Buffer, audioAesKey: string,
     return data.slice(headerSize)
 }
 
-// Adapted from
+// adapted from
 // https://github.com/bahamas10/node-random-mac
 // (MIT Licence)
 export function randomMac(prefix?: string) {
     let mac = prefix || '54:52:00'
     for (let i = 0; i < 6; i++) {
-        if (i % 2 === 0) mac += ':'
+        if (i % 2 === 0) {
+            mac += ':'
+        }
         mac += Math.floor(Math.random() * 16).toString(16)
     }
     return mac
