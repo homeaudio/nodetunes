@@ -43,13 +43,15 @@ function options(rtspServer: RtspServer, req: ServerRequest, res: Response) {
 }
 
 function announceParse(rtspServer: RtspServer, req: ServerRequest, res: Response) {
-
+    if (!req.content) {
+        throw new Error("ANNOUNCE packet is missing content payload")
+    }
     const sdp = tools.parseSdp(req.content.toString())
 
-    for (let i = 0; i < sdp.a.length; i++) {
-        const spIndex = sdp.a[i].indexOf(':')
-        const aKey = sdp.a[i].substring(0, spIndex)
-        const aValue = sdp.a[i].substring(spIndex + 1)
+    for (let i = 0; i < sdp["a"].length; i++) {
+        const spIndex = sdp["a"][i].indexOf(':')
+        const aKey = sdp["a"][i].substring(0, spIndex)
+        const aValue = sdp["a"][i].substring(spIndex + 1)
 
         if (aKey == 'rsaaeskey') {
 
@@ -78,15 +80,18 @@ function announceParse(rtspServer: RtspServer, req: ServerRequest, res: Response
         }
 
     }
-
-    if (sdp.i) {
-        rtspServer.metadata.clientName = sdp.i
+    const clientName = sdp['i']
+    if (clientName) {
+        if (!(typeof clientName === 'string')) {
+            throw new Error('Expected string for client name but found list')
+        }
+        rtspServer.metadata.clientName = clientName
         log('client name reported (%s)', rtspServer.metadata.clientName)
-        rtspServer.external.emit('clientNameChange', sdp.i)
+        rtspServer.external.emit('clientNameChange', sdp['i'])
     }
 
-    if (sdp.c) {
-        if (sdp.c.indexOf('IP6') !== -1) {
+    if (sdp['c']) {
+        if (sdp['c'].indexOf('IP6') !== -1) {
             log('ipv6 usage detected')
             rtspServer.ipv6 = true
         }
@@ -130,12 +135,9 @@ function setup(rtspServer: RtspServer, req: ServerRequest, res: Response) {
     }
 }
 
-// TODO get rid of this global?
-let nonce = ''
-
-
 function announce(rtspServer: RtspServer, req: ServerRequest, res: Response) {
-    log(req.content.toString())
+
+    let nonce = ''
 
     if (rtspServer.clientConnected) {
 
@@ -158,7 +160,7 @@ function announce(rtspServer: RtspServer, req: ServerRequest, res: Response) {
         const auth = req.headers['authorization']
 
         const params = auth.split(/, /g)
-        const map = {}
+        const map: { [key: string]: string} = {}
         params.forEach(param => {
             const pair = param.replace(/["]/g, '').split('=')
             map[pair[0]] = pair[1]
@@ -212,6 +214,10 @@ function teardown(rtspServer: RtspServer, req: ServerRequest, res: Response) {
 
 
 function setParameter(rtspServer: RtspServer, req: ServerRequest, res: Response) {
+    if (!req.content) {
+            throw new Error("Expected to find content for setParameter but found none")
+    }
+
     if (req.headers['content-type'] == 'application/x-dmap-tagged') {
 
         // metadata dmap/daap format
@@ -252,6 +258,9 @@ function setParameter(rtspServer: RtspServer, req: ServerRequest, res: Response)
 }
 
 function getParameter(req: ServerRequest, res: Response) {
+    if (!req.content) {
+        throw new Error("Expected to find content for getParameter but found none")
+    }
     log(`uncaptured GET_PARAMETER method: ${req.content.toString().trim()}`)
     res.send()
 }
