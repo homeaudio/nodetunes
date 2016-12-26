@@ -1,6 +1,6 @@
 # Ignore compiled output
-lib
-
+lib/**/*.js
+*.js.map
 lib-cov
 lcov.info
 *.seed

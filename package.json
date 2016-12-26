@@ -17,13 +17,12 @@
     "node": ">=6"
   },
   "main": "./lib/index.js",
-  "types": "./lib/index.d.ts",
+  "types": "./lib/index.ts",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "lint": "tslint -c tslint.json ./src/*.ts",
-    "start": "node ./examples/server.js",
-    "test": "gulp test"
+    "lint": "tslint -c tslint.json ./lib/*.ts",
+    "start": "node ./examples/server.js"
   },
   "repository": {
     "type": "git",
