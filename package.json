@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "alac2pcm": "^1.1.0",
-    "debug": "^2.3.3",
+    "debug": "^2.4.5",
     "forge": "^2.3.0",
     "httplike": "^1.0.2",
     "ipaddr.js": "^1.2.0",
@@ -42,13 +42,13 @@
   "devDependencies": {
     "@types/debug": "0.0.29",
     "@types/mdns": "0.0.31",
-    "@types/node": "0.0.2",
+    "@types/node": "6.0.54",
     "@types/node-forge": "^0.6.5",
     "@types/priorityqueuejs": "^1.0.1",
     "mocha": "~1.18.2",
     "request": "~2.34.0",
     "speaker": "0.2.6",
-    "tslint": "^4.1.0",
+    "tslint": "^4.2.0",
     "typescript": "^2.1.4"
   },
   "license": "MIT"
